@@ -13,13 +13,13 @@ fun main() {
 }
 
 private fun part1(lines: List<String>): Int {
-    return lines.map {
-        val comp1: String = it.slice(0 until it.length / 2)
-        val comp2: String = it.slice(it.length / 2..it.lastIndex)
-        val comp1Priorities: Set<Int> = comp1.toList().map { it.toPriority() }.toSet()
-        val comp2Priorities: Set<Int> = comp2.toList().map { it.toPriority() }.toSet()
-        comp1Priorities.intersect(comp2Priorities).sum()
-    }
+    return lines
+        .map {
+            val comp1: String = it.slice(0 until it.length / 2)
+            val comp2: String = it.slice(it.length / 2..it.lastIndex)
+            comp1.toSet().intersect(comp2.toSet())
+                .sumOf { letter -> letter.toPriority() }
+        }
         .sum()
 }
 
