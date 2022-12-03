@@ -18,9 +18,7 @@ private fun part1(lines: List<String>): Int {
         val comp2: String = it.slice(it.length / 2..it.lastIndex)
         val comp1Priorities: Set<Int> = comp1.toList().map { it.toPriority() }.toSet()
         val comp2Priorities: Set<Int> = comp2.toList().map { it.toPriority() }.toSet()
-        val unique = comp1Priorities.toMutableSet()
-        unique.retainAll(comp2Priorities)
-        unique.sum()
+        comp1Priorities.intersect(comp2Priorities).sum()
     }
         .sum()
 }
@@ -28,10 +26,10 @@ private fun part1(lines: List<String>): Int {
 private fun part2(lines: List<String>): Int {
     var sum = 0
     for (i in 2..lines.lastIndex step 3) {
-        val unique = lines[i - 2].toHashSet()
-        unique.retainAll(lines[i - 1].toSet())
-        unique.retainAll(lines[i].toSet())
-        sum += unique.sumOf { it.toPriority() }
+        sum += lines[i - 2].toSet()
+            .intersect(lines[i - 1].toSet())
+            .intersect(lines[i].toSet())
+            .sumOf { it.toPriority() }
     }
     return sum
 }
