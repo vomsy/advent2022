@@ -26,9 +26,9 @@ private fun part1(lines: List<String>): Int {
 private fun part2(lines: List<String>): Int {
     var sum = 0
     for (i in 2..lines.lastIndex step 3) {
-        sum += lines[i - 2].toSet()
-            .intersect(lines[i - 1].toSet())
-            .intersect(lines[i].toSet())
+        sum += lines.slice(i - 2..i)
+            .map { it.toSet() }
+            .reduce { acc, curr -> acc.intersect(curr) }
             .sumOf { it.toPriority() }
     }
     return sum
