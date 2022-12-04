@@ -16,10 +16,10 @@ private fun part1(lines: List<String>): Int {
         .map {
             val range1 = it[0].split("-").map { it.toInt() }
             val range2 = it[1].split("-").map { it.toInt() }
-            if (
-                (range1[0] >= range2[0] && range1[1] <= range2[1])
-                || (range1[0] <= range2[0] && range1[1] >= range2[1])
-            ) {
+            val set1 = (range1[0]..range1[1]).toSet()
+            val set2 = (range2[0]..range2[1]).toSet()
+
+            if (set1.containsAll(set2) || set2.containsAll(set1)) {
                 1
             } else {
                 0
@@ -34,7 +34,10 @@ private fun part2(lines: List<String>): Int {
         .map {
             val range1 = it[0].split("-").map { it.toInt() }
             val range2 = it[1].split("-").map { it.toInt() }
-            if (overlaps(range1[0], range1[1], range2[0], range2[1])) {
+            val set1 = (range1[0]..range1[1]).toSet()
+            val set2 = (range2[0]..range2[1]).toSet()
+
+            if (set1.intersect(set2).isNotEmpty()) {
                 1
             } else {
                 0
@@ -42,9 +45,3 @@ private fun part2(lines: List<String>): Int {
         }
         .sum()
 }
-
-fun overlaps(start1: Int, end1: Int, start2: Int, end2: Int): Boolean {
-    return (start1..end1).toSet()
-        .intersect((start2..end2).toSet()).isNotEmpty()
-}
-
