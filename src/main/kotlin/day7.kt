@@ -26,18 +26,17 @@ private fun part1(lines: List<String>): Int {
 }
 
 private fun part2(lines: List<String>): Int {
-    val dirs = mutableListOf<Dir>()
+    val dirs = sortedSetOf<Dir>(Comparator.comparing { it.size() })
     val root: Dir = buildFileSystem(dirs, lines)
 
     val currTotalSize = root.size();
     val needToFreeUp = requiredFreeSpace - (totalDiskSpace - currTotalSize)
     return dirs
         .filter { it.size() > needToFreeUp }
-        .minByOrNull { it.size() }!!
-        .size()
+        .minOf { it.size() }
 }
 
-private fun buildFileSystem(dirs: MutableList<Dir>, lines: List<String>): Dir {
+private fun buildFileSystem(dirs: MutableCollection<Dir>, lines: List<String>): Dir {
     val root = Dir("/", null)
     dirs.add(root)
     var currDir: Dir = root
