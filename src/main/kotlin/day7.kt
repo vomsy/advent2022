@@ -1,8 +1,12 @@
+const val totalDiskSpace: Int = 70000000
+const val requiredFreeSpace: Int = 30000000
+
 fun main() {
     val sample1 = part1(readFileLines("day7/sample.txt"))
     check(sample1 == 95437) { println(sample1) }
     val part1 = part1(readFileLines("day7/input.txt"))
     println("Part 1: $part1")
+    check(part1 == 1084134) { println(part1) }
 
     val sample2 = part2(readFileLines("day7/sample.txt"))
     check(sample2 == 29) { println(sample2) }
@@ -12,6 +16,19 @@ fun main() {
 
 private fun part1(lines: List<String>): Int {
     val dirs = mutableListOf<Dir>()
+    val root: Dir = buildFileSystem(dirs, lines)
+
+    return dirs
+        .map { it.size() }
+        .filter { it <= 100000 }
+        .sum()
+}
+
+private fun part2(input: List<String>): Int {
+    return 0
+}
+
+private fun buildFileSystem(dirs: MutableList<Dir>, lines: List<String>): Dir {
     val root = Dir("/", null)
     dirs.add(root)
     var currDir: Dir = root
@@ -41,15 +58,7 @@ private fun part1(lines: List<String>): Int {
             currDir.childs.add(File(split[1], split[0].toInt(), currDir))
         }
     }
-
-    return dirs
-        .map { it.size() }
-        .filter { it <= 100000 }
-        .sum()
-}
-
-private fun part2(input: List<String>): Int {
-    return 0
+    return root
 }
 
 interface Node {
