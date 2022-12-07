@@ -9,9 +9,10 @@ fun main() {
     check(part1 == 1084134) { println(part1) }
 
     val sample2 = part2(readFileLines("day7/sample.txt"))
-    check(sample2 == 29) { println(sample2) }
+    check(sample2 == 24933642) { println(sample2) }
     val part2 = part2(readFileLines("day7/input.txt"))
     println("Part 2: $part2")
+    check(part2 == 6183184) { println(part2) }
 }
 
 private fun part1(lines: List<String>): Int {
@@ -24,8 +25,16 @@ private fun part1(lines: List<String>): Int {
         .sum()
 }
 
-private fun part2(input: List<String>): Int {
-    return 0
+private fun part2(lines: List<String>): Int {
+    val dirs = mutableListOf<Dir>()
+    val root: Dir = buildFileSystem(dirs, lines)
+
+    val currTotalSize = root.size();
+    val needToFreeUp = requiredFreeSpace - (totalDiskSpace - currTotalSize)
+    return dirs
+        .filter { it.size() > needToFreeUp }
+        .minByOrNull { it.size() }!!
+        .size()
 }
 
 private fun buildFileSystem(dirs: MutableList<Dir>, lines: List<String>): Dir {
@@ -35,13 +44,13 @@ private fun buildFileSystem(dirs: MutableList<Dir>, lines: List<String>): Dir {
 
     for (line in lines.subList(1, lines.size)) {
         if (line.startsWith("$ cd")) {
-            var destination = line.split(" ")[2]
-            currDir = if (destination == "..") {
+            var target = line.split(" ")[2]
+            currDir = if (target == "..") {
                 currDir.parent!!
-            } else (if (destination == "/") {
+            } else (if (target == "/") {
                 root
             } else {
-                currDir.childs.find { it.name == destination }!!
+                currDir.childs.find { it.name == target }!!
             }) as Dir
         }
 
@@ -49,7 +58,6 @@ private fun buildFileSystem(dirs: MutableList<Dir>, lines: List<String>): Dir {
             val dirName = line.split(" ")[1]
             val dir = Dir(dirName, currDir)
             dirs.add(dir)
-            //todo can it ls same folder twice?
             currDir.childs.add(dir)
         }
 
@@ -72,24 +80,15 @@ class File(
     private val size: Int,
     override val parent: Dir?
 ) : Node {
-    override fun size(): Int {
-        return this.size
-    }
+    override fun size(): Int = this.size
 
-    override fun toString(): String {
-        return this.name
-    }
+    override fun toString(): String = this.name
 }
-
 
 class Dir(override val name: String, override val parent: Dir?) : Node {
     var childs = mutableListOf<Node>()
 
-    override fun size(): Int {
-        return childs.sumOf { it.size() }
-    }
+    override fun size(): Int = childs.sumOf { it.size() }
 
-    override fun toString(): String {
-        return "dir ${this.name}"
-    }
+    override fun toString(): String = "dir ${this.name}"
 }
