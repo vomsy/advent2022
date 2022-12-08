@@ -9,13 +9,8 @@ fun main() {
 private fun part2(grid: Array<IntArray>): Int {
     var max = 0
     for ((r, row) in grid.withIndex()) {
-        for ((c, currVal) in row.withIndex()) {
-            val countLeft = countHorizontal(grid, c, currVal, (r-1) downTo 0)
-            val countRight = countHorizontal(grid, c, currVal, (r+1)..grid.lastIndex)
-            val countUp = countVertical(grid, r, currVal, (c-1) downTo 0)
-            val countDown = countVertical(grid, r, currVal, (c+1)..row.lastIndex)
-
-            val newMax = countLeft * countRight * countDown * countUp
+        for (c in row.indices) {
+            val newMax = grid.scenicScore(r, c)
             if (newMax > max) {
                 max = newMax
             }
@@ -24,27 +19,27 @@ private fun part2(grid: Array<IntArray>): Int {
     return max
 }
 
-
-
-
-fun countHorizontal(grid: Array<IntArray>, colIdx: Int, currValue: Int, intRange: IntProgression): Int {
-    var count = 0
-    for (i in intRange) {
-        count++
-        if (grid[i][colIdx] >= currValue) {
-            break
-        }
-    }
-    return count
+fun Array<IntArray>.scenicScore(r: Int, c: Int): Int {
+    val value = this[r][c]
+    return this.count(r, c, value, { it }, { it + 1 }) *
+            this.count(r, c, value, { it }, { it - 1 }) *
+            this.count(r, c, value, { it - 1 }, { it }) *
+            this.count(r, c, value, { it + 1 }, { it })
 }
 
-fun countVertical(grid: Array<IntArray>, rowIdx: Int, currValue: Int, intRange: IntProgression): Int {
-    var count = 0
-    for (i in intRange) {
-        count++
-       if (grid[rowIdx][i] >= currValue) {
-           break
-       }
+fun Array<IntArray>.count(r: Int, c: Int, value: Int, rowFun: (Int) -> Int, colFun: (Int) -> Int): Int {
+    val nextR = rowFun(r)
+    val nextC = colFun(c)
+
+    if (this.getOrNull(nextR) == null || this[nextR].getOrNull(nextC) == null) {
+        return 0
     }
-    return count
+
+    if (this[nextR][nextC] >= value) {
+        return 1
+    }
+
+    return 1 + this.count(nextR, nextC, value, rowFun, colFun)
 }
+
+
