@@ -8,10 +8,18 @@ fun main() {
 
 private fun part2(grid: Array<IntArray>): Int {
     return grid
-        .flatMapIndexed { r, row ->
-            row.mapIndexed { c, _ -> grid.scenicScore(r, c) }
-        }
+        .map2DIndexed { r, c, _ -> grid.scenicScore(r, c) }
         .max()
+}
+
+fun <T> Array<IntArray>.map2DIndexed(func: (Int, Int, Int) -> T): List<T> {
+    return this.flatMapIndexed { r, row ->
+        row.mapIndexed { c, value -> func(r, c, value) }
+    }
+}
+
+fun <T> Array<IntArray>.map2D(func: (Int) -> T): List<T> {
+    return this.map2DIndexed { _, _, value -> func(value) }
 }
 
 fun Array<IntArray>.scenicScore(r: Int, c: Int): Int {
