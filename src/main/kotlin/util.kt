@@ -22,3 +22,7 @@ fun read2DimArray(fileName: String): Array<IntArray> {
 
     return array
 }
+
+fun <T> want(value: T, want: T) {
+    check(value == want) { println("Wanted $want, Got $value") }
+}

@@ -1,9 +1,9 @@
 fun main() {
     val sample2 = part2(read2DimArray("day8/sample.txt"))
-    check(sample2 == 8) { println(sample2) }
+    want(sample2, 8)
     val part2 = part2(read2DimArray("day8/input.txt"))
     println("Part 2: $part2")
-    check(part2 == 252000)
+    want(part2, 252000)
 }
 
 private fun part2(grid: Array<IntArray>): Int {
