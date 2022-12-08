@@ -7,16 +7,11 @@ fun main() {
 }
 
 private fun part2(grid: Array<IntArray>): Int {
-    var max = 0
-    for ((r, row) in grid.withIndex()) {
-        for (c in row.indices) {
-            val newMax = grid.scenicScore(r, c)
-            if (newMax > max) {
-                max = newMax
-            }
+    return grid
+        .flatMapIndexed { r, row ->
+            row.mapIndexed { c, _ -> grid.scenicScore(r, c) }
         }
-    }
-    return max
+        .max()
 }
 
 fun Array<IntArray>.scenicScore(r: Int, c: Int): Int {
