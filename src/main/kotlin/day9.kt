@@ -9,10 +9,12 @@ fun main() {
     want(part1, 6745)
 
     val sample2 = part2(readFileLines("day9/sample.txt"))
-    want(sample2, 0)
+    want(sample2, 1)
+    val larger = part2(readFileLines("day9/larger.txt"))
+    want(larger, 36)
     val part2 = part2(readFileLines("day9/input.txt"))
     println("Part 2: $part2")
-    want(part2, 0)
+    want(part2, 2793)
 }
 
 data class Point(val x: Int, val y: Int) {
@@ -29,6 +31,11 @@ data class Point(val x: Int, val y: Int) {
         val xdiff = abs(this.x - other.x)
         val ydiff = abs(this.y - other.y)
         return xdiff in 0..1 && ydiff in 0..1
+    }
+
+
+    fun isDiagonal(point: Point): Boolean {
+        return this.x != point.x && this.y != point.y
     }
 }
 
@@ -85,5 +92,70 @@ private fun path(p1: Point, p2: Point): List<Point> {
 }
 
 private fun part2(lines: List<String>): Int {
-    TODO("Not yet implemented")
+    val tailVisited = mutableSetOf<Point>()
+    var head = Point(0, 0)
+    var tails = Array(9) { head }
+    tailVisited.add(tails.last())
+    for (line in lines) {
+        val split = line.split(" ")
+        val direction = Direction.valueOf(split[0])
+        val count = split[1].toInt()
+
+        val newHead = head.move(direction, count)
+        val headPath = path(head, newHead);
+
+        for ((i, h) in headPath.withIndex()) {
+            val before = listOf(*tails)
+            if (!h.closeTo(tails[0])) {
+                tails[0] = headPath[i - 1]
+                for (t in 1..8) {
+                    val thisHead = tails[t - 1]
+                    val headBefore = before[t - 1]
+                    val thisTail = tails[t]
+
+                    if (!thisTail.closeTo(thisHead)) {
+                        if (thisTail.x == thisHead.x) {
+                            tails[t] = Point(
+                                thisTail.x, if (thisTail.y < thisHead.y) {
+                                    thisTail.y + 1
+                                } else {
+                                    thisTail.y - 1
+                                }
+                            )
+                        } else if (thisTail.y == thisHead.y) {
+                            tails[t] = Point(
+                                if (thisTail.x < thisHead.x) {
+                                    thisTail.x + 1
+                                } else {
+                                    thisTail.x - 1
+                                }, thisTail.y
+                            )
+                        } else if (headBefore.isDiagonal(thisHead)) {
+                            if (headBefore.x < thisHead.x && headBefore.y < thisHead.y) {
+                                tails[t] = Point(thisTail.x + 1, thisTail.y + 1)
+                            } else if (headBefore.x < thisHead.x
+                                && headBefore.y > thisHead.y
+                            ) {
+                                tails[t] = Point(thisTail.x + 1, thisTail.y - 1)
+                            } else if (headBefore.x > thisHead.x
+                                && headBefore.y > thisHead.y
+                            ) {
+                                tails[t] = Point(thisTail.x - 1, thisTail.y - 1)
+                            } else {
+                                // problem, if it jumps diag, it odesn't need to jump if its on the same axis
+                                tails[t] = Point(thisTail.x - 1, thisTail.y + 1)
+                            }
+                        } else {
+                            tails[t] = headBefore
+                        }
+                    }
+                }
+
+                tailVisited.add(tails.last())
+            }
+        }
+        head = newHead
+        println("$line: H:${head}; T:${tails.reversed()}")
+    }
+    return tailVisited.size
 }
