@@ -1,20 +1,26 @@
+import kotlin.math.abs
+
+var lcm: Long = 0
+
 fun main() {
-    val sample1 = part1(readFileSplitBy("day11/sample.txt", "\n\n"))
-    want(sample1, 10605)
-    val part1 = part1(readFileSplitBy("day11/input.txt", "\n\n"))
-    println("Part 1: $part1")
-    want(part1, 120756)
+    val sample = part2(readFileSplitBy("day11/sample.txt", "\n\n"))
+    want(sample, 2713310158L)
+    val part2 = part2(readFileSplitBy("day11/input.txt", "\n\n"))
+    println("Part 2: $part2")
+    want(part2, 39109444654)
 }
 
-private fun part1(monkeyInput: List<String>): Long {
+private fun part2(monkeyInput: List<String>): Long {
     val monkeys = mutableListOf<Monkey>()
     for (m in monkeyInput) {
         val monkey = parseMonkey(m)
         monkeys.add(monkey)
     }
 
-    for (r in 1..20) {
-        for ((i, m) in monkeys.withIndex()) {
+    lcm = monkeys.map { it.test }.distinct().reduce { n1, n2 -> n1 * n2 }.toLong()
+
+    for (r in 1..10_000) {
+        for (m in monkeys) {
             while (m.items.isNotEmpty()) {
                 val item = m.pop()!!
                 monkeys[item.mIdx].add(item.worry)
@@ -22,7 +28,7 @@ private fun part1(monkeyInput: List<String>): Long {
         }
     }
     val sortedDescending = monkeys.map { it.inspected() }.sortedDescending()
-    return sortedDescending.take(2).reduce { i1, i2 -> i1 * i2 }.toLong()
+    return sortedDescending.take(2).reduce { i1, i2 -> i1 * i2 }
 }
 
 fun parseMonkey(m: String): Monkey {
@@ -66,8 +72,8 @@ data class Monkey(
     val m1: Int,
     val m2: Int
 ) {
-    private var inspected: Int = 0
-    fun inspected(): Int = this.inspected
+    private var inspected: Long = 0
+    fun inspected(): Long = this.inspected
 
     fun add(item: Long) {
         items.add(item)
@@ -79,15 +85,16 @@ data class Monkey(
         }
         val item = items.removeFirst()
         this.inspected++
-        val worry: Long = op(item) / 3
+        var worry: Long = op(item)
+        if (abs(worry) > lcm) {
+            worry %= lcm
+        }
         return if (worry % test == 0L) {
             Item(worry, m1)
         } else {
             Item(worry, m2)
         }
     }
-
-    override fun toString(): String = "items=$items, mod $test ? $m1 : $m2"
 }
 
 
