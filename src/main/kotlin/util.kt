@@ -8,6 +8,10 @@ fun readFileAsStr(fileName: String): String {
     return File("src/main/resources", fileName).readText()
 }
 
+fun readFileSplitBy(fileName: String, split: String): List<String> {
+    return File("src/main/resources", fileName).readText().split(split)
+}
+
 fun read2DimArray(fileName: String): Array<IntArray> {
     val lines = readFileLines(fileName)
     val rows = lines.size
