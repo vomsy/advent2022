@@ -27,6 +27,21 @@ fun read2DimArray(fileName: String): Array<IntArray> {
     return array
 }
 
+fun read2DimArrayStr(fileName: String): Array<Array<Char>> {
+    val lines = readFileLines(fileName)
+    val rows = lines.size
+    val cols = lines[0].length
+    val array = Array(rows) { Array(cols) { '0' } }
+
+    for ((row, line) in lines.withIndex()) {
+        for ((col, n) in line.withIndex()) {
+            array[row][col] = n
+        }
+    }
+
+    return array
+}
+
 fun <T> want(value: T, want: T) {
     check(value == want) { println("Wanted $want, Got $value") }
 }
