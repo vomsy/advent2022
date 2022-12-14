@@ -2,38 +2,42 @@ import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
-    val sample = part1(readFileLines("day14/sample.txt"))
-    want(sample, 24)
-    val part1 = part1(readFileLines("day14/input.txt"))
-    println("Part 1: $part1")
-    want(part1, 745)
+    val sample = part2(readFileLines("day14/sample.txt"))
+    want(sample, 93)
+    val part2 = part2(readFileLines("day14/input.txt"))
+    println("Part 2: $part2")
+    want(part2, 27551)
 }
 
-private fun part1(lines: List<String>): Int {
+private fun part2(lines: List<String>): Int {
     val start = Elem(500, 0)
     val rocks = mutableSetOf<Elem>()
     val sand = mutableSetOf<Elem>()
     addRocks(lines, rocks)
+    val floor = rocks.maxBy { it.y }.y + 2
 
     while (true) {
-        val nextSand = findNextSpot(start, rocks) ?: break
+        val nextSand = findNextSpot(start, rocks, floor)
         rocks.add(nextSand)
         sand.add(nextSand)
+        if (nextSand == start) {
+            break
+        }
     }
 
-    plot(rocks, sand)
+//    plot(rocks, sand)
     return sand.size
 }
 
 private fun plot(rocks: Set<Elem>, sand: Set<Elem>) {
     println()
     val (l, r) = findEdgeRocks(rocks)
-    for(y in 0..rocks.maxBy { it.y }.y) {
+    for (y in 0..rocks.maxBy { it.y }.y) {
         for (x in l.x..r.x) {
             if (sand.contains(Elem(x, y))) {
-               print("o")
+                print("o")
             } else if (rocks.contains(Elem(x, y))) {
-               print("#")
+                print("#")
             } else {
                 print(".")
             }
@@ -43,28 +47,26 @@ private fun plot(rocks: Set<Elem>, sand: Set<Elem>) {
     println()
 }
 
-private tailrec fun findNextSpot(curr: Elem, rocks: Set<Elem>): Elem? {
-    val (leftEdge, rightEdge) = findEdgeRocks(rocks)
+private tailrec fun findNextSpot(curr: Elem, rocks: Set<Elem>, floor: Int): Elem {
+
     val down = Elem(curr.x, curr.y + 1)
     val left = Elem(curr.x - 1, down.y)
     val right = Elem(curr.x + 1, down.y)
 
-    if (!rocks.contains(down)) {
-        return findNextSpot(down, rocks)
+    if (down.y == floor) {
+       return curr
     }
 
-    if (!rocks.contains(left)) {
-        if (down == leftEdge) {
-            return null
-        }
-        return findNextSpot(left, rocks)
+    if (!rocks.contains(down)) {
+        return findNextSpot(down, rocks, floor)
+    }
+
+    return if (!rocks.contains(left)) {
+        findNextSpot(left, rocks, floor)
     } else if (!rocks.contains(right)) {
-        if (down == rightEdge) {
-            return null
-        }
-        return findNextSpot(right, rocks)
+        findNextSpot(right, rocks, floor)
     } else {
-        return curr
+        curr
     }
 }
 
