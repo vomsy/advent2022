@@ -17,7 +17,7 @@ fun main() {
     want(part2, 2793)
 }
 
-data class Point(val x: Int, val y: Int) {
+private data class Point(val x: Int, val y: Int) {
     fun move(d: Direction, n: Int): Point = when (d) {
         R -> Point(x + n, y)
         L -> Point(x - n, y)
