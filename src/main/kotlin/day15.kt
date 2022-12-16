@@ -1,28 +1,14 @@
 import kotlin.math.abs
 
 fun main() {
-    val parse = parse("Sensor at x=3972136, y=2425195: closest beacon is at x=4263070, y=2991690")
-    check(
-        parse == listOf<Long>(
-            3972136, 2425195, 4263070, 2991690
-        )
-    ) { println(parse) }
-    val parse2 = parse("Sensor at x=-10, y=-20: closest beacon is at x=-30, y=-40")
-    check(
-        parse2 == listOf<Long>(
-            -10, -20, -30, -40
-        )
-    ) { println(parse2) }
-
-    val sample = part1(readFileLines("day15/sample.txt"), 10)
-    want(sample, 26)
-    val part1 = part1(readFileLines("day15/input.txt"), 2000000)
-    println("Part 1: $part1")
-    want(part1, 5112034)
-
+    val sample = part2(readFileLines("day15/sample.txt"), 20)
+    want(sample, 56000011)
+    val part2 = part2(readFileLines("day15/input.txt"), 4_000_000)
+    println("Part 2: $part2")
+    want(part2, 13172087230812)
 }
 
-private fun part1(lines: List<String>, y: Long): Int {
+private fun part2(lines: List<String>, maxNum: Long): Long {
     val sigAndBeacons = mutableListOf<List<P>>()
     for (line in lines) {
         val (sX, sY, bX, bY) = parse(line)
@@ -31,40 +17,56 @@ private fun part1(lines: List<String>, y: Long): Int {
         sigAndBeacons.add(listOf(sig, beacon))
     }
 
-    val (minX, maxX) = findMinMaxX(sigAndBeacons)
-    var count = 0
-    for (x in minX..maxX) {
-        val p = P(x, y)
-        for ((sig, beacon) in sigAndBeacons) {
-            if (p == beacon || p == sig) break
+    val outerPoints: Set<P> = sigAndBeacons
+        .flatMap { findOuterPoints(it) }
+        .filter { it.insideGrid(maxNum) }.toSet()
 
-            val sigToB = sig.manhattan(beacon)
-            val sigToPoint = sig.manhattan(p)
-            if (sigToPoint <= sigToB) {
-                count++
+    var r = P(0, 0)
+    for (p in outerPoints) {
+        var insideAny = false
+
+        for ((s, b) in sigAndBeacons) {
+            if (p == s || p == b) {
+                insideAny = true
+                break
+            }
+            if (s.manhattan(p) <= s.manhattan(b)) {
+                insideAny = true
                 break
             }
         }
+
+        if (!insideAny) {
+            r = p
+            break
+        }
     }
 
-    return count
+    println("Found beacon: $r")
+    return r.x * 4_000_000 + r.y
 }
 
-private fun findMinMaxX(sigAndBeacons: MutableList<List<P>>): List<Long> {
-    return listOf(sigAndBeacons
-        .map {
-            val (s, b) = it
-            val manhattan = s.manhattan(b)
-            s.x - manhattan
-        }
-        .min(),
-        sigAndBeacons
-            .map {
-                val (s, b) = it
-                val manhattan = s.manhattan(b)
-                s.x + manhattan
-            }
-            .max())
+private fun findOuterPoints(signalAndBeacon: List<P>): Set<P> {
+    val (sig, b) = signalAndBeacon
+    val m = sig.manhattan(b) + 1
+    val outerEdgePoints = mutableSetOf<P>()
+
+    var count = 0
+    for (x in (sig.x - m)..sig.x) {
+        outerEdgePoints.add(P(x, sig.y + count))
+        outerEdgePoints.add(P(x, sig.y - count))
+        count++
+    }
+
+    count = 0
+    for (x in (sig.x + m) downTo sig.x) {
+        outerEdgePoints.add(P(x, sig.y + count))
+        outerEdgePoints.add(P(x, sig.y - count))
+        count++
+    }
+
+
+    return outerEdgePoints
 }
 
 private fun parse(s: String): List<Long> {
@@ -74,6 +76,6 @@ private fun parse(s: String): List<Long> {
 }
 
 private data class P(val x: Long, val y: Long) {
-
     fun manhattan(other: P): Long = abs(this.x - other.x) + abs(this.y - other.y)
+    fun insideGrid(maxNum: Long): Boolean = this.x in 0..maxNum && this.y in 0..maxNum
 }
